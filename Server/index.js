@@ -1,6 +1,9 @@
 const database = require("./config/database");
 const express = require("express");
 const app = express();
+const userRoutes = require("./routes/user");
+const cookieParser = require("cookie-parser");
+const cors = require("cors");
 const dotenv = require("dotenv");
 
 //loading environment variables
@@ -18,6 +21,19 @@ const conectDB = async() =>{
     }
 }
 conectDB();
+
+// Middlewares
+app.use(express.json());
+app.use(cookieParser());
+app.use(
+	cors({
+		origin: "*",
+		credentials: true,
+	})
+);
+
+// Setting up routes
+app.use("/api/v1/auth", userRoutes);
 
 
 //Testing the server
