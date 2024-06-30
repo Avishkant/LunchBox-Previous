@@ -55,8 +55,9 @@ exports.signup = async (req, res) => {
     }
 
     // Find the most recent OTP for the email
+    console.log("Email received in signup:", email);
     const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1)
-    console.log(response)
+    console.log("OTP retrieval response:", response); 
     if (response.length === 0) {
       // OTP not found for the email
       return res.status(400).json({
@@ -127,7 +128,8 @@ exports.login = async (req, res) => {
     }
 
     // Find user with provided email
-    const user = await User.findOne({ email }).populate("additionalDetails")
+    // const user = await User.findOne({ email }).populate("additionalDetails")
+    const user = await User.findOne({ email })
 
     // If user not found with provided email
     if (!user) {
@@ -195,7 +197,7 @@ exports.sendotp = async (req, res) => {
         message: `User is Already Registered`,
       })
     }
- 
+  
     var otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,
