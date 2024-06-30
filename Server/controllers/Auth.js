@@ -4,7 +4,7 @@ const OTP = require("../models/OTP")
 const jwt = require("jsonwebtoken")
 const otpGenerator = require("otp-generator")
 const mailSender = require("../utils/mailSender")
-const { passwordUpdated } = require("../mail/templates/passwordUpdate")
+const { passwordUpdated } = require("../mail/passwordUpdate")
 require("dotenv").config()
 
 // Signup Controller for Registering USers
@@ -195,7 +195,7 @@ exports.sendotp = async (req, res) => {
         message: `User is Already Registered`,
       })
     }
-
+ 
     var otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,
