@@ -1,0 +1,117 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Lato', sans-serif;
+}
+
+.outerbox {
+    width: 100%;
+    min-height: 100vh; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #31a6d5; 
+    background-image: linear-gradient(to top left, #2292a5, #63acc0); 
+    overflow: hidden; 
+}
+
+.innerbox {
+    margin: 20px 0px;
+    width: 360px;
+    padding: 20px 40px;
+    background-color: #fff; 
+    border-radius: 8px;
+    box-shadow: 3px 3px 15px rgba(0, 0, 0, 0.3); 
+    overflow: hidden; 
+    position: relative; 
+}
+
+.signup header {
+    text-align: center;
+    margin-bottom: 20px;
+    position: relative; 
+}
+
+.signup header h1 {
+    font-size: 1.5rem;
+    color: #212121;
+}
+
+.signup header .logo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 80px; 
+    height: auto; 
+    z-index: 1; 
+}
+
+.signup header img {
+    width: 100px; 
+    height: auto; 
+    z-index: 2; 
+}
+
+
+.signup-body {
+    margin-bottom: 20px;
+}
+
+.signup-body p {
+    margin-bottom: 15px;
+}
+
+.signup-body label {
+    display: block;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.signup-body input[type="text"],
+.signup-body input[type="email"],
+.signup-body input[type="password"],
+.signup-body input[type="tel"] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.signup-body input[type="radio"] {
+    margin-right: 8px;
+}
+
+.signup-body button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    background-color: #2a91ba; 
+    color: #fff;
+    font-size: 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.signup-body button[type="submit"]:hover {
+    background-color: #1e728d; 
+}
+
+/* Footer styles */
+.signup-footer {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.signup-footer a {
+    color: #2a91ba; 
+    text-decoration: none;
+}
+
+.signup-footer a:hover {
+    text-decoration: underline;
+}
