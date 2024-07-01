@@ -179,6 +179,21 @@ exports.login = async (req, res) => {
     })
   }
 }
+
+//  Logout
+// exports.logoutUser = (req, res) => {
+//   if (req.session) {
+//       req.session.destroy((err) => {
+//           if (err) {
+//               return res.status(500).json({ success: false, message: 'Failed to log out' });
+//           }
+//           res.status(200).json({ success: true, message: 'Logged out successfully' });
+//       });
+//   } else {
+//       res.status(400).json({ success: false, message: 'No session to log out from' });
+//   }
+// };
+
 // Send OTP For Email Verification
 exports.sendotp = async (req, res) => {
   try {
