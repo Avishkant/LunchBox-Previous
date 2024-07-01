@@ -55,21 +55,21 @@ exports.signup = async (req, res) => {
     }
 
     // Find the most recent OTP for the email
-    // const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1)
-    // console.log(response)
-    // if (response.length === 0) {
-    //   // OTP not found for the email
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "The OTP is not valid",
-    //   })
-    // } else if (otp !== response[0].otp) {
-    //   // Invalid OTP
-    //   return res.status(400).json({
-    //     success: false,
-    //     message: "The OTP is not valid",
-    //   })
-    // }
+    const response = await OTP.find({ email }).sort({ createdAt: -1 }).limit(1)
+    console.log(response)
+    if (response.length === 0) {
+      // OTP not found for the email
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      })
+    } else if (otp !== response[0].otp) {
+      // Invalid OTP
+      return res.status(400).json({
+        success: false,
+        message: "The OTP is not valid",
+      })
+    }
 
     // Hash the password
     const hashedPassword = await bcrypt.hashSync(password, 10)
@@ -178,6 +178,21 @@ exports.login = async (req, res) => {
     })
   }
 }
+
+//  Logout
+// exports.logoutUser = (req, res) => {
+//   if (req.session) {
+//       req.session.destroy((err) => {
+//           if (err) {
+//               return res.status(500).json({ success: false, message: 'Failed to log out' });
+//           }
+//           res.status(200).json({ success: true, message: 'Logged out successfully' });
+//       });
+//   } else {
+//       res.status(400).json({ success: false, message: 'No session to log out from' });
+//   }
+// };
+
 // Send OTP For Email Verification
 exports.sendotp = async (req, res) => {
   try {
@@ -196,7 +211,7 @@ exports.sendotp = async (req, res) => {
         message: `User is Already Registered`,
       })
     }
- 
+  
     var otp = otpGenerator.generate(6, {
       upperCaseAlphabets: false,
       lowerCaseAlphabets: false,

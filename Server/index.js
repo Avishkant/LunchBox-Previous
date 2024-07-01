@@ -2,6 +2,8 @@ const database = require("./config/database");
 const express = require("express");
 const app = express();
 const userRoutes = require("./routes/user");
+const cartRoutes = require("./routes/cart");
+const orderRoutes = require('./routes/order');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -34,6 +36,8 @@ app.use(
 
 // Setting up routes
 app.use("/api/v1/auth", userRoutes);
+app.use('/api/cart', cartRoutes);
+app.use('/api/order', orderRoutes);
 
 
 //Testing the server
