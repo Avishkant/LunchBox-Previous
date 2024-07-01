@@ -48,12 +48,12 @@ const userSchema = new mongoose.Schema(
             // required: true
         },
 
-        pastOrders: [
-            {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: 'Order'
-            }
-        ],
+        // pastOrders: [
+        //     {
+        //         type: mongoose.Schema.Types.ObjectId,
+        //         ref: 'Order'
+        //     }
+        // ],
 
         //Additional Details for the tiffine provider
         serviceName: {
@@ -77,6 +77,11 @@ const userSchema = new mongoose.Schema(
                 ref: 'Order'
             }
         ],
+
+        // Cart Reference
+        cart: {
+            type: mongoose.Schema.Types.ObjectId, ref: 'Cart'
+        },
     },
 
 
