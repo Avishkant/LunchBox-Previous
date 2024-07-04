@@ -1,59 +1,71 @@
-const Cart = require('../models/Cart');
-const Order = require('../models/Order');
-const User = require('../models/User');
+const Order = require('../models/order');
 
-// Create an order from the cart
-exports.createOrder = async (req, res) => {
-  const { userId, tiffinProviderId, paymentMethod } = req.body;
-
-  try {
-    const cart = await Cart.findOne({ user: userId }).populate('items');
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ message: 'Cart is empty' });
+// Get all orders for a user (both ongoing and delivered)
+exports.getUserOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orders = await Order.find({ customer: userId }).sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
     }
-
-    const totalPrice = cart.items.reduce((total, item) => total + item.price * item.quantity, 0);
-
-    const order = new Order({
-      user: userId,
-      tiffinProvider: tiffinProviderId,
-      items: cart.items,
-      totalPrice,
-      paymentMethod,
-    });
-
-    await order.save();
-
-    // Clear the user's cart after order is placed
-    cart.items = [];
-    await cart.save();
-
-    res.status(201).json(order);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
 };
 
-// Get ongoing orders
-exports.getOngoingOrders = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const ongoingOrders = await Order.find({ user: userId, status: { $ne: 'Delivered' } }).populate('items');
-    res.status(200).json(ongoingOrders);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+// Get past orders (delivered) for a user
+exports.getUserPastOrders = async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const orders = await Order.find({ customer: userId, status: 'Delivered' }).sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 };
 
-// Get past orders
-exports.getPastOrders = async (req, res) => {
-  const { userId } = req.params;
+// Get all ongoing and past orders for a provider
+exports.getProviderOrders = async (req, res) => {
+    try {
+        const providerId = req.user.id;
+        const orders = await Order.find({ provider: providerId }).sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
 
-  try {
-    const pastOrders = await Order.find({ user: userId, status: 'Delivered' }).populate('items');
-    res.status(200).json(pastOrders);
-  } catch (error) {
-    res.status(500).json({ message: 'Server error' });
-  }
+// Get past orders (delivered) for a provider
+exports.getProviderPastOrders = async (req, res) => {
+    try {
+        const providerId = req.user.id;
+        const orders = await Order.find({ provider: providerId, status: 'Delivered' }).sort({ createdAt: -1 });
+        res.status(200).json({ success: true, data: orders });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+};
+
+// Update the status of an order
+exports.updateOrderStatus = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { status } = req.body;
+        const validStatuses = ['Pending', 'Accepted', 'Rejected', 'Delivered'];
+
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ success: false, message: 'Invalid status' });
+        }
+
+        const order = await Order.findOne({ _id: id, provider: req.user.id });
+
+        if (!order) {
+            return res.status(404).json({ success: false, message: 'Order not found or not authorized' });
+        }
+
+        order.status = status;
+        await order.save();
+
+        res.status(200).json({ success: true, data: order });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
 };

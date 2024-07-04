@@ -1,26 +1,17 @@
 const express = require('express');
 const router = express.Router();
+const { auth } = require('../middleware/auth');
 const {
-    addDishToCart,
-    getCart,
-    removeDishFromCart,
-    incrementDishQuantity,
-    decrementDishQuantity
+    addTiffinToCart,
+    incrementTiffinQuantity,
+    decrementTiffinQuantity,
+    removeTiffinFromCart
 } = require('../controllers/cartController');
 
-// Add dish to the cart
-router.post('/add', addDishToCart);
-
-// Get user's cart
-router.get('/:userId', getCart);
-
-// Remove dish from the cart
-router.post('/remove', removeDishFromCart);
-
-// Increment dish quantity
-router.post('/increment', incrementDishQuantity);
-
-// Decrement dish quantity
-router.post('/decrement', decrementDishQuantity);
+// Routes for cart operations
+router.post('/add', auth, addTiffinToCart); // Add tiffin to cart
+router.patch('/increment', auth, incrementTiffinQuantity); // Increment tiffin quantity
+router.patch('/decrement', auth, decrementTiffinQuantity); // Decrement tiffin quantity
+router.delete('/remove', auth, removeTiffinFromCart); // Remove tiffin from cart
 
 module.exports = router;

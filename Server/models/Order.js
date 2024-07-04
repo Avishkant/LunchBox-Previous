@@ -1,48 +1,42 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema(
-    {
-        user: {
-            type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true
-        },
-        tiffinProvider: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'TiffinProvider',
-            required: true
-        },
-        menuItems: [
-            {
-                dishName: {
-                    type: String,
-                    required: true
-                },
-                quantity: {
-                    type: Number,
-                    required: true
-                },
-                price: {
-                    type: Number,
-                    required: true
-                },
-            }
-        ],
-        totalPrice: {
-            type: Number,
-            required: true
-        },
-        paymentMethod: {
-            type: String,
-            required: true,
-            enum: ['COD', 'Online']
-        },
-        status: {
-            type: String,
-            required: true,
-            enum: ['Pending', 'Accepted', 'Rejected', 'Delivered'],
-            default: 'Pending'
-        },
-    }, 
-    { timestamps: true }
-);
+const orderSchema = new mongoose.Schema({
+    tiffin: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Tiffin',
+        required: true
+    },
+    customer: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    provider: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    status: {
+        type: String,
+        enum: ['Pending', 'Accepted', 'Rejected', 'Delivered'],
+        default: 'Pending'
+    },
+    // deliveryDate: {
+    //     type: Date
+    // },
+    orderType: {
+        type: String,
+        enum: ['Single', 'Monthly'],
+        required: true
+    },
+    daysCompleted: {
+        type: Number,
+        default: 0
+    },
+    orderAmount: {
+        type: Number,
+        required: true
+    }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);

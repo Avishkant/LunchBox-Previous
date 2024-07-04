@@ -1,131 +1,130 @@
-const Cart = require('../models/Cart');
-const User = require('../models/User');
+const mongoose = require('mongoose');
+const Cart = require('../models/cart');
+const Tiffin = require('../models/tiffin');
 
-// Add dish to the cart
-const addDishToCart = async (req, res) => {
-  try {
-      const { userId, dishName, price, quantity } = req.body;
-      let cart = await Cart.findOne({ userId });
-
-      if (cart) {
-          // Check if dish already exists
-          const dishIndex = cart.items.findIndex(item => item.dishName === dishName);
-          if (dishIndex > -1) {
-              cart.items[dishIndex].quantity += quantity;  // Increment quantity
-              if (cart.items[dishIndex].quantity <= 0) {
-                  cart.items.splice(dishIndex, 1);  // Remove dish if quantity is zero or less
-              }
-          } else {
-              cart.items.push({ dishName, price, quantity });
-          }
-          await cart.save();
-      } else {
-          // Create a new cart if it doesn't exist
-          cart = new Cart({
-              userId,
-              items: [{ dishName, price, quantity }]
-          });
-          await cart.save();
-      }
-
-      res.status(200).json({ success: true, message: 'Dish added to cart', cart });
-  } catch (error) {
-      res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-
-// Get user's cart
-const getCart = async (req, res) => {
+// Add a tiffin to the cart
+exports.addTiffinToCart = async (req, res) => {
     try {
-        const { userId } = req.params;
-        const cart = await Cart.findOne({ userId });
+        const { tiffinId, quantity } = req.body;
+        const customerId = req.user.id;
 
-        if (!cart) {
-            return res.status(404).json({ success: false, message: 'Cart not found' });
+        const tiffin = await Tiffin.findById(tiffinId);
+        if (!tiffin) {
+            return res.status(404).json({ success: false, message: 'Tiffin not found' });
         }
 
-        res.status(200).json({ success: true, cart });
+        // Find the cart and update the quantity if the tiffin already exists
+        const cart = await Cart.findOneAndUpdate(
+            { customer: customerId, 'tiffins.tiffin': tiffinId },
+            { $inc: { 'tiffins.$.quantity': quantity } },
+            { new: true }
+        );
+
+        if (cart && cart.tiffins.some(item => item.tiffin.equals(tiffinId))) {
+            return res.status(200).json({ success: true, data: cart });
+        }
+
+        // If the tiffin is not found in the cart, add it to the cart
+        const updatedCart = await Cart.findOneAndUpdate(
+            { customer: customerId },
+            { $push: { tiffins: { tiffin: tiffinId, quantity } } },
+            { new: true, upsert: true }
+        );
+
+        res.status(200).json({ success: true, data: updatedCart });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Remove dish from the cart
-const removeDishFromCart = async (req, res) => {
-    try {
-        const { userId, dishName } = req.body;
-        const cart = await Cart.findOne({ userId });
 
-        if (!cart) {
-            return res.status(404).json({ success: false, message: 'Cart not found' });
+// Increment the quantity of a tiffin in the cart
+exports.incrementTiffinQuantity = async (req, res) => {
+    try {
+        const { tiffinId } = req.body;
+        const customerId = req.user.id;
+
+        const cart = await Cart.findOneAndUpdate(
+            { customer: customerId, 'tiffins.tiffin': tiffinId },
+            { $inc: { 'tiffins.$.quantity': 1 } },
+            { new: true }
+        );
+
+        if (!cart || !cart.tiffins.find(item => item.tiffin.equals(tiffinId))) {
+            return res.status(404).json({ success: false, message: 'Tiffin not found in cart' });
         }
 
-        // Filter out the dish to be removed
-        cart.items = cart.items.filter(item => item.dishName !== dishName);
-        await cart.save();
-
-        res.status(200).json({ success: true, message: 'Dish removed from cart', cart });
+        res.status(200).json({ success: true, data: cart });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
 
-// Increment dish quantity
-const incrementDishQuantity = async (req, res) => {
+
+// Decrement the quantity of a tiffin in the cart
+exports.decrementTiffinQuantity = async (req, res) => {
     try {
-        const { userId, dishName } = req.body;
-        const cart = await Cart.findOne({ userId });
+        const { tiffinId } = req.body;
+        const customerId = req.user.id;
 
-        if (!cart) {
-            return res.status(404).json({ success: false, message: 'Cart not found' });
+        const cart = await Cart.findOneAndUpdate(
+            { customer: customerId, 'tiffins.tiffin': tiffinId },
+            { $inc: { 'tiffins.$.quantity': -1 } },
+            { new: true }
+        );
+
+        if (!cart || !cart.tiffins.find(item => item.tiffin.equals(tiffinId))) {
+            return res.status(404).json({ success: false, message: 'Tiffin not found in cart' });
         }
 
-        const dish = cart.items.find(item => item.dishName === dishName);
-        if (!dish) {
-            return res.status(404).json({ success: false, message: 'Dish not found in cart' });
+        if (cart.tiffins.find(item => item.tiffin.equals(tiffinId)).quantity <= 0) {
+            await Cart.findOneAndUpdate(
+                { customer: customerId },
+                { $pull: { tiffins: { tiffin: tiffinId } } },
+                { new: true }
+            );
         }
 
-        dish.quantity += 1;  // Increment quantity
-        await cart.save();
-
-        res.status(200).json({ success: true, message: 'Dish quantity incremented', cart });
+        res.status(200).json({ success: true, data: cart });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
 };
+ 
 
-// Decrement dish quantity
-const decrementDishQuantity = async (req, res) => {
+// Remove a tiffin from the cart
+exports.removeTiffinFromCart = async (req, res) => {
     try {
-        const { userId, dishName } = req.body;
-        const cart = await Cart.findOne({ userId });
+        const { tiffinId } = req.body;
+        const customerId = req.user.id;
 
+        // Convert tiffinId to ObjectId
+        const tiffinObjectId = new mongoose.Types.ObjectId(tiffinId);
+
+        console.log('Removing tiffin with ID:', tiffinObjectId); // Debugging log
+
+        // Find the cart and pull the tiffin from the array
+        const cart = await Cart.findOneAndUpdate(
+            { customer: customerId, 'tiffins.tiffin': tiffinObjectId },
+            { $pull: { tiffins: { tiffin: tiffinObjectId } } },
+            { new: true }
+        );
+
+        console.log('Updated cart:', cart); // Debugging log
+
+        // Check if the cart exists and if the tiffin was removed
         if (!cart) {
             return res.status(404).json({ success: false, message: 'Cart not found' });
         }
 
-        const dish = cart.items.find(item => item.dishName === dishName);
-        if (!dish) {
-            return res.status(404).json({ success: false, message: 'Dish not found in cart' });
+        // If there are no tiffins left, delete the cart
+        if (cart.tiffins.length === 0) {
+            await Cart.findByIdAndDelete(cart._id);
+            return res.status(200).json({ success: true, message: 'Cart was empty and has been deleted' });
         }
 
-        dish.quantity -= 1;  // Decrement quantity
-        if (dish.quantity <= 0) {
-            cart.items = cart.items.filter(item => item.dishName !== dishName);  // Remove dish if quantity is zero
-        }
-        await cart.save();
-
-        res.status(200).json({ success: true, message: 'Dish quantity decremented', cart });
+        res.status(200).json({ success: true, data: cart });
     } catch (error) {
         res.status(500).json({ success: false, message: error.message });
     }
-};
-
-module.exports = {
-    addDishToCart,
-    getCart,
-    removeDishFromCart,
-    incrementDishQuantity,
-    decrementDishQuantity
 };

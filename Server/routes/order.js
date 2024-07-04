@@ -1,9 +1,21 @@
 const express = require('express');
 const router = express.Router();
-const orderController = require('../controllers/orderController');
+const { auth } = require('../middleware/auth');
+const {
+    getUserOrders,
+    getUserPastOrders,
+    getProviderOrders,
+    getProviderPastOrders,
+    updateOrderStatus
+} = require('../controllers/orderController');
 
-router.post('/create', orderController.createOrder);
-router.get('/ongoing/:userId', orderController.getOngoingOrders);
-router.get('/past/:userId', orderController.getPastOrders);
+// Routes for user
+router.get('/user/orders', auth, getUserOrders);
+router.get('/user/past-orders', auth, getUserPastOrders);
+
+// Routes for provider
+router.get('/provider/orders', auth, getProviderOrders);
+router.get('/provider/past-orders', auth, getProviderPastOrders);
+router.patch('/provider/orders/:id/status', auth, updateOrderStatus);  // New route for updating order status
 
 module.exports = router;

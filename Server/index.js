@@ -1,12 +1,16 @@
 const database = require("./config/database");
 const express = require("express");
 const app = express();
-const userRoutes = require("./routes/user");
-const cartRoutes = require("./routes/cart");
-const orderRoutes = require('./routes/order');
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 const dotenv = require("dotenv");
+
+// Routes Files
+const userRoutes = require("./routes/user");
+const cartRoutes = require("./routes/cart");
+const orderRoutes = require('./routes/order');
+// const dishRoutes = require("./routes/dish");
+const tiffinRoutes = require('./routes/tiffin');
 
 //loading environment variables
 dotenv.config();
@@ -38,6 +42,8 @@ app.use(
 app.use("/api/v1/auth", userRoutes);
 app.use('/api/cart', cartRoutes);
 app.use('/api/order', orderRoutes);
+// app.use("/api/dish", dishRoutes);
+app.use('/api/tiffins', tiffinRoutes);
 
 
 //Testing the server
