@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const Cart = require('../models/cart');
-const Tiffin = require('../models/tiffin');
+const Cart = require('../models/ChotoDabbo');
+const Tiffin = require('../models/Dabba');
 
 // Add a tiffin to the cart
 exports.addTiffinToCart = async (req, res) => {
